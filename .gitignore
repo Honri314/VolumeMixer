@@ -1,3 +1,7 @@
 .build/
 .swiftpm/
 .DS_Store
+
+# Internal-only files
+rule.md
+buildlog.md
