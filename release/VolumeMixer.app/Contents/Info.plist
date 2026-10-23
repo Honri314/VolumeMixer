@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key> <string>VolumeMixer</string>
+    <key>CFBundleIdentifier</key> <string>com.volmixer.app</string>
+    <key>CFBundleName</key> <string>VolumeMixer</string>
+    <key>CFBundlePackageType</key> <string>APPL</string>
+    <key>CFBundleShortVersionString</key> <string>0.1.0</string>
+    <key>CFBundleVersion</key> <string>4</string>
+    <key>LSMinimumSystemVersion</key> <string>14.4</string>
+    <key>LSUIElement</key> <true/>
+    <key>NSAudioCaptureUsageDescription</key>
+    <string>앱별 볼륨을 조절하기 위해 각 앱의 오디오 출력에 접근합니다.</string>
+    <key>NSHighResolutionCapable</key> <true/>
+</dict>
+</plist>

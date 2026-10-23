@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VolumeMixer - macOS 앱별 볼륨 믹서</title>
+<style>
+:root {
+  --bg: #0b1020; --card: #131a2e; --card2: #182136; --line: #232c47;
+  --text: #e2e8f0; --muted: #94a3b8; --dim: #7d8bab;
+  --blue: #4FACFE; --emerald: #00C97D; --grad: linear-gradient(135deg,#4FACFE,#00C97D);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:-apple-system,'SF Pro Display','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  color:var(--text); background:var(--bg); line-height:1.65;
+}
+.wrap { max-width:1080px; margin:0 auto; padding:0 28px; }
+
+header { position:sticky; top:0; z-index:50; backdrop-filter:blur(14px); background:rgba(11,16,32,.78); border-bottom:1px solid var(--line); }
+.hd { display:flex; align-items:center; justify-content:space-between; height:64px; }
+.logo { display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.1rem; }
+.logo .mark { width:32px; height:32px; border-radius:9px; background:var(--grad); display:grid; place-items:center; color:#04121c; }
+.logo .mark svg { width:20px; height:20px; stroke:#04121c; fill:none; stroke-width:2.4; stroke-linecap:round; }
+nav { display:flex; gap:26px; font-size:.93rem; align-items:center; }
+nav a { color:var(--muted); text-decoration:none; }
+nav a:hover { color:var(--text); }
+.discord {
+  display:inline-flex; align-items:center; gap:7px; padding:8px 16px; border-radius:10px;
+  background:#5865F2; color:#fff; font-weight:700; font-size:.88rem; text-decoration:none; transition:.2s;
+}
+.discord:hover { filter:brightness(1.12); transform:translateY(-1px); }
+.discord svg { width:18px; height:18px; fill:#fff; }
+
+.hero { padding:96px 0 72px; text-align:center; position:relative; overflow:hidden; }
+.hero::before, .hero::after { content:""; position:absolute; width:520px; height:520px; border-radius:50%; filter:blur(140px); opacity:.32; }
+.hero::before { background:#4FACFE; top:-260px; left:-160px; }
+.hero::after { background:#00C97D; bottom:-300px; right:-140px; }
+.hero .inner { position:relative; }
+.hero h1 { font-size:3rem; font-weight:850; letter-spacing:-.02em; line-height:1.2; margin-bottom:16px; }
+.hero h1 .g { background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero p.sub { color:var(--muted); font-size:1.1rem; max-width:620px; margin:0 auto 34px; }
+.btnrow { display:flex; gap:13px; justify-content:center; flex-wrap:wrap; margin-bottom:14px; }
+.btn { display:inline-flex; align-items:center; gap:9px; padding:14px 30px; border-radius:13px; font-weight:800; text-decoration:none; transition:.2s; }
+.btn.primary { background:var(--grad); color:#05121a; box-shadow:0 10px 30px rgba(0,201,125,.28); }
+.btn.primary:hover { transform:translateY(-2px); box-shadow:0 14px 36px rgba(0,201,125,.4); }
+.btn.ghost { border:1px solid var(--line); color:var(--text); background:rgba(255,255,255,.03); }
+.btn.ghost:hover { border-color:var(--blue); color:var(--blue); }
+.meta { color:var(--muted); font-size:.85rem; }
+
+section { padding:70px 0; border-top:1px solid var(--line); }
+h2 { font-size:1.7rem; font-weight:800; margin-bottom:10px; letter-spacing:-.01em; }
+p.lead { color:var(--muted); margin-bottom:34px; }
+.features { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:18px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:24px; }
+.card h3 { font-size:1.05rem; font-weight:750; margin-bottom:8px; display:flex; align-items:center; gap:9px; }
+.card .num { display:inline-grid; place-items:center; width:26px; height:26px; border-radius:8px; background:rgba(79,172,254,.14); color:var(--blue); font-size:.85rem; font-weight:800; }
+.card p { color:var(--muted); font-size:.93rem; }
+
+/* ============================== 다운로드 섹션 ============================== */
+.dlgrid { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:stretch; }
+.dlcard {
+  background:linear-gradient(160deg, var(--card2), var(--card));
+  border:1px solid var(--line); border-radius:20px; padding:0; overflow:hidden;
+  display:flex; flex-direction:column;
+  transition:.25s;
+}
+.dlcard:hover { border-color:rgba(79,172,254,.4); box-shadow:0 18px 44px rgba(0,0,0,.35); transform:translateY(-2px); }
+.dlcard.reco { border-color:rgba(0,201,125,.35); }
+.dlhead { padding:22px 24px 18px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.dlhead h3 { font-size:1.15rem; font-weight:800; }
+.dlhead .vtag {
+  flex:none; background:rgba(0,201,125,.14); color:var(--emerald);
+  padding:4px 12px; border-radius:99px; font-size:.8rem; font-weight:700;
+}
+.dlbody { padding:0 24px 20px; display:grid; gap:12px; }
+.dlrow { display:flex; align-items:center; gap:10px; color:var(--dim); font-size:.87rem; }
+.dlrow.item { color:var(--muted); }
+.dlrow svg.ic { width:1.1em; height:1.1em; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+.dlbtnrow { padding:0 24px 24px; margin-top:auto; }
+.bigbtn {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:15px 20px; border-radius:13px; font-weight:800; font-size:1rem; text-decoration:none; transition:.2s;
+  background:var(--grad); color:#05121a; box-shadow:0 8px 24px rgba(0,201,125,.24);
+}
+.bigbtn:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,201,125,.35); filter:brightness(1.05); }
+.bigbtn svg { width:18px; height:18px; stroke:#05121a; fill:none; stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; }
+.ghostbtn {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  padding:15px 20px; border-radius:13px; font-weight:700; font-size:.95rem; text-decoration:none; transition:.2s;
+  border:1px solid var(--line); color:var(--text); background:rgba(255,255,255,.03);
+}
+.ghostbtn:hover { border-color:var(--blue); color:var(--blue); }
+.ghostbtn svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* 사양 테이블 */
+.specs { border-top:1px solid var(--line); background:rgba(0,0,0,.16); padding:16px 24px 18px; display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; font-size:.87rem; }
+.specs div { display:flex; gap:8px; align-items:baseline; }
+.specs .k { color:var(--dim); flex:none; width:74px; font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; }
+.specs .v { color:var(--text); font-weight:600; }
+
+.req { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:24px; margin-top:22px; }
+.req h4 { font-size:1rem; font-weight:800; margin-bottom:14px; }
+.req ul { list-style:none; display:grid; gap:12px; }
+.req li { display:flex; gap:10px; color:var(--muted); font-size:.95rem; }
+.req li b { color:var(--text); font-weight:700; }
+.dot { width:8px; height:8px; border-radius:50%; background:var(--emerald); margin-top:8px; flex:none; }
+.dot.warn { background:#FFB020; }
+
+dl.steps { display:grid; gap:16px; margin-top:10px; }
+dl.steps div { display:flex; gap:14px; align-items:flex-start; }
+dt { flex:none; width:30px; height:30px; border-radius:9px; background:rgba(0,201,125,.14); color:var(--emerald); display:grid; place-items:center; font-weight:800; font-size:.9rem; }
+dd { color:var(--muted); font-size:.95rem; padding-top:3px; }
+
+footer { border-top:1px solid var(--line); padding:36px 0; color:var(--muted); font-size:.87rem; text-align:center; }
+footer a { color:var(--blue); text-decoration:none; }
+
+@media (max-width: 720px) {
+  .dlgrid { grid-template-columns:1fr; }
+  .specs { grid-template-columns:1fr; }
+  .hero h1 { font-size:2.2rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <div class="logo">
+      <span class="mark"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
+      VolumeMixer
+    </div>
+    <nav>
+      <a href="#features">기능</a>
+      <a href="#download">다운로드</a>
+      <a href="#install">설치</a>
+      <a class="discord" href="https://discord.com/invite/FGqZ7jJpFD" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.6 19.6 0 0 0 15.5 3l-.2.5a17 17 0 0 1 4.3 1.6 15.6 15.6 0 0 0-15.2 0A17 17 0 0 1 8.7 3.5L8.5 3a19.6 19.6 0 0 0-4.8 1.5C1 9.2.3 13.9.5 18.6a19.8 19.8 0 0 0 6 3l.5-.7a13 13 0 0 1-2-.9l.4-.3a14.2 14.2 0 0 0 12.2 0l.4.3c-.6.4-1.3.7-2 .9l.6.7a19.7 19.7 0 0 0 6-3c.2-5.3-.6-9.9-2.3-14.2zM8.5 15.3c-1.2 0-2.1-1-2.1-2.3s.9-2.3 2.1-2.3 2.2 1 2.1 2.3c0 1.3-.9 2.3-2.1 2.3zm7 0c-1.2 0-2.1-1-2.1-2.3s.9-2.3 2.1-2.3 2.2 1 2.1 2.3c0 1.3-.9 2.3-2.1 2.3z"/></svg>
+        디스코드 참가
+      </a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap inner">
+    <h1>VolumeMixer<br><span class="g">macOS 앱별 볼륨 믹서</span></h1>
+    <p class="sub">
+      Windows처럼 출력 중인 앱마다 소리 크기를 따로 조절합니다.
+      커널 확장도, 가상 오디오 드라이버 설치도 없습니다. 완전 무료 오픈 스타일,
+      macOS 14.4+ Process Tap 기반.
+    </p>
+    <div class="btnrow">
+      <a class="btn primary" href="#download">다운로드 하러 가기</a>
+      <a class="btn ghost" href="https://discord.com/invite/FGqZ7jJpFD" target="_blank" rel="noopener">디스코드에서 소식 받기</a>
+    </div>
+    <div class="meta">ver <span id="hero-version">0.1.0</span> · macOS 14.4 이상 · Apple Silicon (arm64)</div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <h2>주요 기능</h2>
+    <p class="lead">메뉴바에서 항상 접근, 제어센터처럼 각 앱의 긴 볼륨 바를 따로 조절합니다</p>
+    <div class="features">
+      <div class="card"><h3><span class="num">1</span> 메뉴바 위젯</h3><p>메뉴바에서 바로 팝오버로 열며, 출력 중인 앱 목록이 자동 갱신됩니다.</p></div>
+      <div class="card"><h3><span class="num">2</span> 제어센터 스타일 바</h3><p>세로로 긴 캡슐형 볼륨 바를 드래그해 앱마다 따로 조절. 퍼센트가 실시간 표시됩니다.</p></div>
+      <div class="card"><h3><span class="num">3</span> 원본 스트림 보존</h3><p>볼륨 100%일 때는 tap 없이 충실하게 원본 출력. 조절 중일 때만 tap을 열어 처리합니다.</p></div>
+      <div class="card"><h3><span class="num">4</span> 드라이버 설치 불필요</h3><p>kext·BlackHole 같은 가상 드라이버 없이 Apple Core Audio Process Tap만 사용합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <h2>다운로드</h2>
+    <p class="lead">Apple Silicon Mac 전용 DMG 입니다</p>
+
+    <div class="dlgrid">
+      <!-- DMG 권장 카드 -->
+      <div class="dlcard reco">
+        <div class="dlhead">
+          <h3>DMG 설치 이미지</h3>
+          <span class="vtag">v<span class="ver">0.1.0</span></span>
+        </div>
+        <div class="dlbody">
+          <div class="dlrow item">
+            <svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12l3 3 3-3M12 9v6"/></svg>
+            <span><b id="dmg-name" style="color:var(--text); font-weight:700;">VolumeMixer-0.1.0.dmg</b></span>
+          </div>
+          <div class="dlrow">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            <span id="dmg-size">파일 크기 확인 중...</span>
+          </div>
+          <div class="dlrow">
+            <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            <span>macOS 14.4 이상 · Apple Silicon 전용</span>
+          </div>
+        </div>
+        <div class="dlbtnrow">
+          <a class="bigbtn" id="main-dl-btn" href="dl/VolumeMixer-0.1.0.dmg">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            DMG 내려받기
+          </a>
+        </div>
+      </div>
+
+      <!-- 앱 소개 카드 -->
+      <div class="dlcard">
+        <div class="dlhead">
+          <h3>설치하면 이렇게 됩니다</h3>
+          <span class="vtag" style="background:rgba(79,172,254,.14); color:var(--blue);">미리보기</span>
+        </div>
+        <div class="dlbody">
+          <div class="dlrow">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <span>메뉴바 오른쪽(시계 근처)에 <b style="color:var(--text);">슬라이더 아이콘</b>이 생깁니다</span>
+          </div>
+          <div class="dlrow">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M4 18V4m0 14h6M4 18l6-10"/></svg>
+            <span>아이콘 클릭 → 앱별 <b style="color:var(--text);">세로 볼륨 바</b>가 나란히 표시됩니다</span>
+          </div>
+          <div class="dlrow">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+            <span>바를 드래그하면 <b style="color:var(--text);">그 앱 소리만</b> 즉시 커집니다/작아집니다</span>
+          </div>
+          <div class="dlrow">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+            <span>다른 앱 소리·시스템 음량은 <b style="color:var(--text);">그대로</b> 유지됩니다</span>
+          </div>
+        </div>
+        <div class="dlbtnrow">
+          <a class="ghostbtn" href="https://discord.com/invite/FGqZ7jJpFD" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.6 19.6 0 0 0 15.5 3l-.2.5a17 17 0 0 1 4.3 1.6 15.6 15.6 0 0 0-15.2 0A17 17 0 0 1 8.7 3.5L8.5 3a19.6 19.6 0 0 0-4.8 1.5C1 9.2.3 13.9.5 18.6a19.8 19.8 0 0 0 6 3l.5-.7a13 13 0 0 1-2-.9l.4-.3a14.2 14.2 0 0 0 12.2 0l.4.3c-.6.4-1.3.7-2 .9l.6.7a19.7 19.7 0 0 0 6-3c.2-5.3-.6-9.9-2.3-14.2zM8.5 15.3c-1.2 0-2.1-1-2.1-2.3s.9-2.3 2.1-2.3 2.2 1 2.1 2.3c0 1.3-.9 2.3-2.1 2.3zm7 0c-1.2 0-2.1-1-2.1-2.3s.9-2.3 2.1-2.3 2.2 1 2.1 2.3c0 1.3-.9 2.3-2.1 2.3z" fill="currentColor" stroke="none"/></svg>
+            소식·피드백은 디스코드에서
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사양 -->
+    <div class="dlcard" style="margin-top:20px;">
+      <div class="dlhead"><h3>릴리스 정보</h3><span class="vtag">v<span class="ver">0.1.0</span></span></div>
+      <div class="specs">
+        <div><span class="k">Version</span><span class="v" id="spec-version">0.1.0</span></div>
+        <div><span class="k">Released</span><span class="v">2026-10-12</span></div>
+        <div><span class="k">Platform</span><span class="v">macOS 14.4+ (Apple Silicon)</span></div>
+        <div><span class="k">Type</span><span class="v">Menu bar app (무료)</span></div>
+      </div>
+    </div>
+
+    <div class="req">
+      <h4>시스템 요구사항</h4>
+      <ul>
+        <li><span class="dot"></span><span><b>macOS 14.4</b> 이상 (Apple Process Tap API 요구)</span></li>
+        <li><span class="dot"></span><span><b>Apple Silicon</b> (M1/M2/M3/M4) Mac</span></li>
+        <li><span class="dot warn"></span><span>첫 실행 시 <b>시스템 설정 &gt; 개인정보보호 &gt; 오디오 녹음</b> 권한을 승인해야 앱별 조절이 동작합니다</span></li>
+        <li><span class="dot warn"></span><span>Gatekeeper 닫힘 안내 시: <b>마우스 우클릭 &gt; 열기</b>로 우회 가능 (ad-hoc 서명 앱)</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>설치 방법</h2>
+    <p class="lead">3단계로 끝납니다</p>
+    <dl class="steps">
+      <div><dt>1</dt><dd>DMG를 열고 <b>VolumeMixer.app</b>를 <b>Applications</b> 폴더로 옮깁니다.</dd></div>
+      <div><dt>2</dt><dd>앱을 실행하면 <b>메뉴바</b>에 슬라이더 아이콘이 나타납니다. (Dock 아이콘은 없습니다)</dd></div>
+      <div><dt>3</dt><dd>아이콘 클릭 후, 소리를 내고 있는 앱의 <b>세로 볼륨 바</b>를 내려서 조절합니다.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    VolumeMixer · Apple Core Audio Process Tap 기반 무료 메뉴바 앱 · 소식과 피드백은 <a href="https://discord.com/invite/FGqZ7jJpFD" target="_blank" rel="noopener">디스코드</a>에서
+  </div>
+</footer>
+
+<script>
+const DMG_NAME = 'VolumeMixer-0.1.0.dmg';
+const DL_URL = 'dl/' + DMG_NAME;
+
+// 1. api/version으로 버전 통일
+fetch('api/version').then(r => r.json()).then(j => {
+  if (j.version) {
+    document.querySelectorAll('.ver').forEach(e => e.textContent = j.version);
+    document.getElementById('hero-version').textContent = j.version;
+    document.getElementById('spec-version').textContent = j.version;
+    document.getElementById('dmg-name').textContent = `VolumeMixer-${j.version}.dmg`;
+    document.getElementById('main-dl-btn').href = `dl/VolumeMixer-${j.version}.dmg`;
+  }
+}).catch(() => {});
+
+// 2. DMG 실제 크기 실측 (HEAD 요청)
+fetch(DL_URL, { method: 'HEAD' }).then(r => {
+  const len = r.headers.get('content-length');
+  if (len) {
+    const kb = Math.round(len / 1024);
+    document.getElementById('dmg-size').textContent =
+      kb >= 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
+  } else {
+    document.getElementById('dmg-size').textContent = '파일 크기 확인 실패';
+  }
+}).catch(() => {
+  document.getElementById('dmg-size').textContent = '파일 크기 확인 실패';
+});
+</script>
+
+</body>
+</html>
